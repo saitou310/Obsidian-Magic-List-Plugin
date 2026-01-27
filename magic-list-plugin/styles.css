@@ -31,3 +31,288 @@
     border-radius: 4px;
     z-index: 5;
 }
+
+
+.magic-card-root {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* スタッツ枠 */
+.magic-deck-stats {
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--background-secondary);
+    font-size: 0.85rem;
+}
+
+/* 見出し */
+.magic-deck-stats h4 {
+    margin: 0 0 0.25rem;
+}
+
+.magic-deck-stats h5 {
+    margin: 0.25rem 0;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+
+/* スタッツ全体の枠はそのまま */
+.magic-deck-stats {
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--background-secondary);
+    font-size: 0.85rem;
+}
+
+.magic-deck-stats h4 {
+    margin: 0 0 0.25rem;
+}
+
+.magic-deck-stats h5 {
+    margin: 0.25rem 0;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+
+
+.magic-mana-bar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    min-width: 1.4rem;
+}
+
+.magic-mana-bar-rect {
+    background-color: red !important;
+}
+
+/* 枚数をバーの上に表示 */
+.magic-mana-bar-rect::after {
+    content: attr(data-count);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, -2px);
+    font-size: 0.65rem;
+    white-space: nowrap;
+    color: var(--text-normal);
+}
+
+.magic-mana-bar-xlabel {
+    font-size: 0.7rem;
+    text-align: center;
+    font-family: var(--font-monospace);
+}
+
+/* タイプ表 & 合計は前と同じでOK */
+.magic-type-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.25rem;
+}
+
+.magic-type-table th,
+.magic-type-table td {
+    padding: 0.1rem 0.25rem;
+    font-size: 0.8rem;
+}
+
+.magic-type-table th {
+    text-align: left;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.magic-deck-summary {
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* タイプ別表 */
+.magic-type-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.25rem;
+}
+
+.magic-type-table th,
+.magic-type-table td {
+    padding: 0.1rem 0.25rem;
+    font-size: 0.8rem;
+}
+
+.magic-type-table th {
+    text-align: left;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.magic-deck-summary {
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* === マナカーブ（縦棒グラフ） ======================= */
+.magic-mana-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.4rem;
+    height: 3.6rem;          /* グラフ全体の高さ */
+    margin-top: 0.25rem;
+    /* ここが基準高さになる */
+}
+
+.magic-mana-bar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;  /* 下に寄せる */
+    gap: 0.15rem;
+    min-width: 1.4rem;
+    height: 100%;               /* ← これが重要！ */
+}
+
+/* 棒本体 */
+.magic-mana-bar-rect {
+    width: 1.2rem;
+    background-color: var(--interactive-accent);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    box-sizing: border-box;
+    min-height: 2px;            /* 0枚でも線が見えるように */
+}
+
+/* 0枚のときは細い線だけにする（お好みで） */
+.magic-mana-bar-rect[data-count="0"] {
+    height: 2px !important;
+}
+
+/* 枚数をバーの上に表示 */
+.magic-mana-bar-rect::after {
+    content: attr(data-count);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, -2px);
+    font-size: 0.65rem;
+    white-space: nowrap;
+    color: var(--text-normal);
+}
+
+/* X軸ラベル */
+.magic-mana-bar-xlabel {
+    font-size: 0.7rem;
+    text-align: center;
+    font-family: var(--font-monospace);
+}
+
+.magic-card-placeholder {
+    min-height: 260px; /* カードの高さに合わせて調整 */
+    padding: 4px;
+    font-size: 0.8em;
+    border-radius: 4px;
+    background-color: var(--background-modifier-border);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+
+/* === Deck Stats: マナカーブとカードタイプを横並び ======================= */
+.magic-deck-stats-body {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    flex-wrap: wrap; /* 画面が狭い時は折り返す */
+}
+
+.magic-mana-curve-section,
+.magic-type-section,
+.magic-color-section {
+    flex: 1 1 260px; /* 260px未満なら折り返す */
+    min-width: 0;
+}
+
+/* タイプ表の縦幅を少し詰める */
+.magic-type-table th,
+.magic-type-table td {
+    padding: 0.05rem 0.2rem;
+}
+
+.magic-deck-stats-empty {
+    opacity: 0.8;
+    font-size: 0.8rem;
+}
+
+
+/* 色別表 */
+.magic-color-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.25rem;
+}
+
+.magic-color-table th,
+.magic-color-table td {
+    padding: 0.05rem 0.2rem;
+    font-size: 0.8rem;
+}
+
+.magic-color-table th {
+    text-align: left;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+
+/* ---------- Pie charts ---------- */
+.magic-pie-wrap {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 0.35rem;
+}
+
+.magic-pie {
+    flex: 0 0 auto;
+}
+
+.magic-pie-slice {
+    stroke: var(--background-secondary);
+    stroke-width: 2;
+}
+
+/* 色分けは JS 側で fill を指定 */
+.magic-pie-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    font-size: 0.78rem;
+    opacity: 0.95;
+}
+
+.magic-pie-legend-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    line-height: 1.2;
+}
+
+.magic-pie-swatch {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 3px;
+    display: inline-block;
+    border: 1px solid var(--background-modifier-border);
+}
+
