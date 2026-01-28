@@ -50,11 +50,37 @@ class ImageZoomModal extends Modal {
 // ==============================
 // 設定・共通変数
 // ==============================
-const CACHE_ROOT = "scryfall";
-const JSON_DIR = `${CACHE_ROOT}/json`;
-const IMG_DIR = `${CACHE_ROOT}/img`;
+// ==============================
+// 設定・共通変数
+// ==============================
 
+// これらは「設定」で上書きできるように、const ではなく let にしています
+let CACHE_ROOT = "scryfall";
+let JSON_DIR = `${CACHE_ROOT}/json`;
+let IMG_DIR  = `${CACHE_ROOT}/img`;
 
+// Bulk JSON（大きい一括JSON）のパスも、ディレクトリ設定に追従できるように let にします
+let JA_ONLY_BULK_PATH = `${JSON_DIR}/ja_only.json`;
+let ORACLE_BULK_PATH  = `${JSON_DIR}/oracle-cards-20251209102455.json`;
+
+function normalizePath(p) {
+    // Obsidian の vault 内パス想定（区切りを / に統一、末尾 / は削除）
+    return String(p ?? "").replace(/\\/g, "/").replace(/\/+$/g, "");
+}
+
+function applyCacheDirSettings(settings) {
+    const root = normalizePath(settings?.cacheRoot || "scryfall") || "scryfall";
+    const jsonDir = normalizePath(settings?.jsonDir || `${root}/json`) || `${root}/json`;
+    const imgDir  = normalizePath(settings?.imgDir  || `${root}/img`)  || `${root}/img`;
+
+    CACHE_ROOT = root;
+    JSON_DIR   = jsonDir;
+    IMG_DIR    = imgDir;
+
+    // 追従
+    JA_ONLY_BULK_PATH = `${JSON_DIR}/ja_only.json`;
+    ORACLE_BULK_PATH  = `${JSON_DIR}/oracle-cards-20251209102455.json`;
+}
 
 // ==============================
 // プラグイン設定
@@ -65,6 +91,11 @@ const DEFAULT_SETTINGS = {
     showTypePie: true,
     showColorCounts: true,
     showColorPie: true,
+
+    // ローカルキャッシュ（vault内）の保存先
+    cacheRoot: "scryfall",
+    jsonDir: "scryfall/json",
+    imgDir: "scryfall/img",
 };
 
 class MagicListSettingTab extends PluginSettingTab {
@@ -142,15 +173,67 @@ new Setting(containerEl)
     );
 
 
+
+
+        containerEl.createEl("h3", { text: "キャッシュ保存先（Vault内パス）" });
+
+        new Setting(containerEl)
+            .setName("キャッシュルート")
+            .setDesc("Scryfall キャッシュのルートフォルダ（例: scryfall）")
+            .addText((text) =>
+                text
+                    .setPlaceholder("scryfall")
+                    .setValue(this.plugin.settings.cacheRoot)
+                    .onChange(async (value) => {
+                        this.plugin.settings.cacheRoot = value || "scryfall";
+                        // ルートが変わった場合、json/img がデフォルトのままなら追従させる
+                        // （ユーザーが明示指定している場合はそのまま）
+                        if (this.plugin.settings.jsonDir === "scryfall/json") {
+                            this.plugin.settings.jsonDir = `${this.plugin.settings.cacheRoot}/json`;
+                        }
+                        if (this.plugin.settings.imgDir === "scryfall/img") {
+                            this.plugin.settings.imgDir = `${this.plugin.settings.cacheRoot}/img`;
+                        }
+                        await this.plugin.saveSettings();
+                        applyCacheDirSettings(this.plugin.settings);
+                        await ensureCacheDirs();
+                    })
+            );
+
+        new Setting(containerEl)
+            .setName("JSON保存先")
+            .setDesc("カードJSONキャッシュの保存先（例: scryfall/json）")
+            .addText((text) =>
+                text
+                    .setPlaceholder("scryfall/json")
+                    .setValue(this.plugin.settings.jsonDir)
+                    .onChange(async (value) => {
+                        this.plugin.settings.jsonDir = value || `${this.plugin.settings.cacheRoot}/json`;
+                        await this.plugin.saveSettings();
+                        applyCacheDirSettings(this.plugin.settings);
+                        await ensureCacheDirs();
+                    })
+            );
+
+        new Setting(containerEl)
+            .setName("画像保存先")
+            .setDesc("カード画像キャッシュの保存先（例: scryfall/img）")
+            .addText((text) =>
+                text
+                    .setPlaceholder("scryfall/img")
+                    .setValue(this.plugin.settings.imgDir)
+                    .onChange(async (value) => {
+                        this.plugin.settings.imgDir = value || `${this.plugin.settings.cacheRoot}/img`;
+                        await this.plugin.saveSettings();
+                        applyCacheDirSettings(this.plugin.settings);
+                        await ensureCacheDirs();
+                    })
+            );
+
     }
 }
 
 // ★ 追加ここから ----------------------------
-
-// 大きな一括JSONのパス
-const JA_ONLY_BULK_PATH = `${JSON_DIR}/ja_only.json`;
-const ORACLE_BULK_PATH = `${JSON_DIR}/oracle-cards-20251209102455.json`;
-
 // 一括JSONをメモリにキャッシュしておく変数
 let jaOnlyIndex = null;
 let oracleIndex = null;
@@ -1159,6 +1242,7 @@ module.exports = class MagicListPlugin extends Plugin {
         console.log("MagicListPlugin loaded (with local Scryfall cache)");
 
         await this.loadSettings();
+        applyCacheDirSettings(this.settings);
         this.addSettingTab(new MagicListSettingTab(this.app, this));
 
         await ensureCacheDirs();
